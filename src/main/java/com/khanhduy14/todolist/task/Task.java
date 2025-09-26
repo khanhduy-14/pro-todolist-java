@@ -1,6 +1,6 @@
-package com.khanhduy14.todolist.model;
+package com.khanhduy14.todolist.task;
 
-import com.khanhduy14.todolist.constant.task.TaskStatus;
+import com.khanhduy14.todolist.task.constant.TaskStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

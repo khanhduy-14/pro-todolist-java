@@ -1,4 +1,4 @@
-package com.khanhduy14.todolist.constant.task;
+package com.khanhduy14.todolist.task.constant;
 
 public enum TaskStatus {
     TO_DO,

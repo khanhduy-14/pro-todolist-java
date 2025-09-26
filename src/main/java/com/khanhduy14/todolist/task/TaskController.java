@@ -1,9 +1,7 @@
-package com.khanhduy14.todolist.controller;
+package com.khanhduy14.todolist.task;
 
 
-import com.khanhduy14.todolist.dto.CreateTaskRequest;
-import com.khanhduy14.todolist.model.Task;
-import com.khanhduy14.todolist.service.TaskService;
+import com.khanhduy14.todolist.task.dto.TaskCreateReqDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +17,7 @@ public class TaskController {
        return taskService.getTasks();
     }
     @PostMapping
-    public Task addTask(@RequestBody CreateTaskRequest task) {
-        return taskService.addTask(task);
+    public Task addTask(@RequestBody TaskCreateReqDTO request) {
+        return taskService.addTask(request);
     }
 }

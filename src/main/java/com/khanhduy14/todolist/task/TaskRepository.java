@@ -1,7 +1,5 @@
-package com.khanhduy14.todolist.repository;
+package com.khanhduy14.todolist.task;
 
-
-import com.khanhduy14.todolist.model.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
