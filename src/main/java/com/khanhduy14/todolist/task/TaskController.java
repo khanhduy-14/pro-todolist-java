@@ -22,14 +22,18 @@ public class TaskController {
     public ResponseEntity<List<Task>> getTasks() {
        return ResponseEntity.ok(taskService.getTasks());
     }
+
     @PostMapping
     public ResponseEntity<Task> addTask(@RequestBody TaskCreateReqDTO request) {
         return ResponseEntity.ok(taskService.addTask(request));
-    }
+    };
+
+
     @GetMapping("/{id}")
     public ResponseEntity<Task> getTask(@PathVariable Integer id) {
         return ResponseEntity.ok(findTaskOrFail(id));
     }
+
     @PatchMapping("/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable Integer id, @RequestBody TaskUpdateReqDTO updates) {
         Task task = findTaskOrFail(id);
