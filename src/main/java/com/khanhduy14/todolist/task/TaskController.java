@@ -3,7 +3,6 @@ package com.khanhduy14.todolist.task;
 
 import com.khanhduy14.todolist.task.dto.TaskCreateReqDTO;
 import com.khanhduy14.todolist.task.dto.TaskUpdateReqDTO;
-import com.khanhduy14.todolist.utils.RecordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +25,7 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<Task> addTask(@RequestBody TaskCreateReqDTO request) {
         return ResponseEntity.ok(taskService.addTask(request));
-    };
+    }
 
 
     @GetMapping("/{id}")
@@ -37,7 +36,7 @@ public class TaskController {
     @PatchMapping("/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable Integer id, @RequestBody TaskUpdateReqDTO updates) {
         Task task = findTaskOrFail(id);
-        Task updatedTask = taskService.updateTaskByFields(task, RecordUtils.toMap(updates));
+        Task updatedTask = taskService.updateTask(task, updates);
         return ResponseEntity.ok(updatedTask);
     }
 
@@ -48,7 +47,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    public Task findTaskOrFail(Integer id) {
+    private Task findTaskOrFail(Integer id) {
         return taskService.getTask(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
     }
