@@ -1,4 +1,4 @@
-package com.khanhduy14.todolist.task;
+package com.khanhduy14.todolist.task.entity;
 
 import com.khanhduy14.todolist.task.constant.TaskStatus;
 import lombok.AllArgsConstructor;
@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-
 
 @Data
 @Builder
@@ -21,3 +20,4 @@ public class Task {
     private Instant createdAt;
     private Instant updatedAt;
 }
+

@@ -3,6 +3,7 @@ package com.khanhduy14.todolist.task;
 import com.khanhduy14.todolist.task.constant.TaskStatus;
 import com.khanhduy14.todolist.task.dto.TaskCreateReqDTO;
 import com.khanhduy14.todolist.task.dto.TaskUpdateReqDTO;
+import com.khanhduy14.todolist.task.entity.Task;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -142,6 +143,7 @@ public class TaskE2ETest extends GlobalE2ETest {
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
+        System.out.println("da tao task: " + response.getBody());
         return response.getBody();
     }
 }
