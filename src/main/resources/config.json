@@ -1,0 +1,13 @@
+{
+    "application": {
+      "name": "todolist"
+    },
+    "database": {
+      "primary": {
+        "url": "jdbc:postgresql://localhost:5432/todolist_java",
+        "username": "postgres",
+        "password": "postgres",
+        "driverClassName": "org.postgresql.Driver"
+      }
+    }
+}
