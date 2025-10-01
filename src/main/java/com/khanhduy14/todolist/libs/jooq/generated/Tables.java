@@ -4,7 +4,9 @@
 package com.khanhduy14.todolist.libs.jooq.generated;
 
 
+import com.khanhduy14.todolist.libs.jooq.generated.tables.Label;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.Task;
+import com.khanhduy14.todolist.libs.jooq.generated.tables.TaskLabel;
 
 
 /**
@@ -14,7 +16,17 @@ import com.khanhduy14.todolist.libs.jooq.generated.tables.Task;
 public class Tables {
 
     /**
+     * The table <code>public.label</code>.
+     */
+    public static final Label LABEL = Label.LABEL;
+
+    /**
      * The table <code>public.task</code>.
      */
     public static final Task TASK = Task.TASK;
+
+    /**
+     * The table <code>public.task_label</code>.
+     */
+    public static final TaskLabel TASK_LABEL = TaskLabel.TASK_LABEL;
 }

@@ -4,7 +4,11 @@
 package com.khanhduy14.todolist.libs.jooq.generated;
 
 
+import com.khanhduy14.todolist.libs.jooq.generated.tables.Label;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.Task;
+import com.khanhduy14.todolist.libs.jooq.generated.tables.TaskLabel;
+import com.khanhduy14.todolist.libs.jooq.generated.tables.records.LabelRecord;
+import com.khanhduy14.todolist.libs.jooq.generated.tables.records.TaskLabelRecord;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.records.TaskRecord;
 
 import org.jooq.TableField;
@@ -24,5 +28,8 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<LabelRecord> LABEL_NAME_KEY = Internal.createUniqueKey(Label.LABEL, DSL.name("label_name_key"), new TableField[] { Label.LABEL.NAME }, true);
+    public static final UniqueKey<LabelRecord> LABEL_PKEY = Internal.createUniqueKey(Label.LABEL, DSL.name("label_pkey"), new TableField[] { Label.LABEL.ID }, true);
     public static final UniqueKey<TaskRecord> TASK_PKEY = Internal.createUniqueKey(Task.TASK, DSL.name("task_pkey"), new TableField[] { Task.TASK.ID }, true);
+    public static final UniqueKey<TaskLabelRecord> TASK_LABEL_PKEY = Internal.createUniqueKey(TaskLabel.TASK_LABEL, DSL.name("task_label_pkey"), new TableField[] { TaskLabel.TASK_LABEL.TASK_ID, TaskLabel.TASK_LABEL.LABEL_ID }, true);
 }

@@ -4,7 +4,9 @@
 package com.khanhduy14.todolist.libs.jooq.generated;
 
 
+import com.khanhduy14.todolist.libs.jooq.generated.tables.Label;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.Task;
+import com.khanhduy14.todolist.libs.jooq.generated.tables.TaskLabel;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,9 +32,19 @@ public class Public extends SchemaImpl {
     public static final Public PUBLIC = new Public();
 
     /**
+     * The table <code>public.label</code>.
+     */
+    public final Label LABEL = Label.LABEL;
+
+    /**
      * The table <code>public.task</code>.
      */
     public final Task TASK = Task.TASK;
+
+    /**
+     * The table <code>public.task_label</code>.
+     */
+    public final TaskLabel TASK_LABEL = TaskLabel.TASK_LABEL;
 
     /**
      * No further instances allowed
@@ -57,7 +69,9 @@ public class Public extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.asList(
-            Task.TASK
+            Label.LABEL,
+            Task.TASK,
+            TaskLabel.TASK_LABEL
         );
     }
 }

@@ -28,7 +28,7 @@ public class TaskE2ETest extends GlobalE2ETest {
 
     @Test
     void shouldCreateTask() {
-        TaskCreateReqDTO req = new TaskCreateReqDTO("Test task", "Test description");
+        TaskCreateReqDTO req = new TaskCreateReqDTO("Test task", "Test description", List.of("Label A", "Label B"));
 
         ResponseEntity<Task> response = restTemplate.exchange(
                 BASE_URL,
@@ -41,6 +41,8 @@ public class TaskE2ETest extends GlobalE2ETest {
         assertThat(response.getBody().getTitle()).isEqualTo(req.title());
         assertThat(response.getBody().getId()).isGreaterThan(0);
         assertThat(response.getBody().getStatus()).isEqualTo(TaskStatus.TO_DO);
+        assertThat(response.getBody().getDescription()).isEqualTo(req.description());
+        assertThat(response.getBody().getLabels()).containsExactlyInAnyOrderElementsOf(req.labels());
     }
 
     @Test
@@ -56,6 +58,7 @@ public class TaskE2ETest extends GlobalE2ETest {
                 HttpEntity.EMPTY,
                 Task[].class
         );
+
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -82,6 +85,7 @@ public class TaskE2ETest extends GlobalE2ETest {
         assertThat(body.getId()).isEqualTo(created.getId());
         assertThat(body.getTitle()).isEqualTo(created.getTitle());
         assertThat(body.getDescription()).isEqualTo(created.getDescription());
+        assertThat(body.getLabels()).containsExactlyInAnyOrderElementsOf(created.getLabels());
         assertThat(body.getStatus()).isEqualTo(TaskStatus.TO_DO);
     }
 
@@ -92,7 +96,8 @@ public class TaskE2ETest extends GlobalE2ETest {
         TaskUpdateReqDTO updates = new TaskUpdateReqDTO(
                 Optional.of("Patched Title"),
                 Optional.empty(),
-                Optional.of(TaskStatus.IN_PROGRESS)
+                Optional.of(TaskStatus.IN_PROGRESS),
+                Optional.of(List.of("Label X Updated", "Label B"))
         );
 
         ResponseEntity<Task> response = restTemplate.exchange(
@@ -108,6 +113,7 @@ public class TaskE2ETest extends GlobalE2ETest {
         assertThat(updated.getId()).isEqualTo(created.getId());
         assertThat(updated.getTitle()).isEqualTo(updates.title().orElse(null));
         assertThat(updated.getDescription()).isEqualTo(created.getDescription());
+        assertThat(updated.getLabels()).containsExactlyInAnyOrderElementsOf(updates.labels().orElse(null));
         assertThat(updated.getStatus()).isEqualTo(updates.status().orElse(null));
     }
 
@@ -134,7 +140,7 @@ public class TaskE2ETest extends GlobalE2ETest {
     }
 
     private Task createTask(String title, String description) {
-        TaskCreateReqDTO req = new TaskCreateReqDTO(title, description);
+        TaskCreateReqDTO req = new TaskCreateReqDTO(title, description,  List.of("Label A", "Label B", "Label C"));
         ResponseEntity<Task> response = restTemplate.exchange(
                 BASE_URL,
                 HttpMethod.POST,
@@ -143,7 +149,6 @@ public class TaskE2ETest extends GlobalE2ETest {
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        System.out.println("da tao task: " + response.getBody());
         return response.getBody();
     }
 }

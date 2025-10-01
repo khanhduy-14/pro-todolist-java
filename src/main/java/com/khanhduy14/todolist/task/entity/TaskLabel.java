@@ -1,4 +1,5 @@
-package com.khanhduy14.todolist.label;
+package com.khanhduy14.todolist.task.entity;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,15 +8,13 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
-
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Data
-public class Label {
-    private int id;
-    private String name;
+public class TaskLabel {
+    private int taskId;
+    private int labelId;
     private Instant createdAt;
     private Instant updatedAt;
 }
