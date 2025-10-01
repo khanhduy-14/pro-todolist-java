@@ -3,6 +3,7 @@ package com.khanhduy14.todolist.task.repository.impl;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.records.TaskLabelRecord;
 import com.khanhduy14.todolist.task.entity.TaskLabel;
 import com.khanhduy14.todolist.task.repository.TaskLabelRepository;
+import com.khanhduy14.todolist.utils.DateTimeUtils;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
@@ -22,10 +23,9 @@ public class TaskLabelRepositoryImpl implements TaskLabelRepository {
     }
     @Override
     public List<TaskLabel> save(int taskId, List<Integer> labelIds) {
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         var step = dsl.insertInto(TASK_LABEL, TASK_LABEL.TASK_ID, TASK_LABEL.LABEL_ID, TASK_LABEL.CREATED_AT, TASK_LABEL.UPDATED_AT);
         for (Integer labelId : labelIds) {
-            step.values(taskId, labelId, now, now);
+            step.values(taskId, labelId, DateTimeUtils.now(), DateTimeUtils.now());
         }
         return step
                 .returning(TASK_LABEL.TASK_ID, TASK_LABEL.LABEL_ID, TASK_LABEL.CREATED_AT, TASK_LABEL.UPDATED_AT)
@@ -59,7 +59,7 @@ public class TaskLabelRepositoryImpl implements TaskLabelRepository {
         return TaskLabel.builder()
                 .taskId(r.get(TASK_LABEL.TASK_ID))
                 .labelId(r.get(TASK_LABEL.LABEL_ID))
-                .createdAt(r.get(LABEL.CREATED_AT).toInstant(ZoneOffset.UTC))
-                .updatedAt(r.get(LABEL.UPDATED_AT).toInstant(ZoneOffset.UTC)).build();
+                .createdAt(DateTimeUtils.toInstant(r.get(LABEL.CREATED_AT)))
+                .updatedAt(DateTimeUtils.toInstant(r.get(LABEL.UPDATED_AT))).build();
     }
 }

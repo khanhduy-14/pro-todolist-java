@@ -4,6 +4,7 @@ import com.khanhduy14.todolist.libs.jooq.generated.tables.records.TaskRecord;
 import com.khanhduy14.todolist.task.constant.TaskStatus;
 import com.khanhduy14.todolist.task.entity.Task;
 import com.khanhduy14.todolist.task.repository.TaskRepository;
+import com.khanhduy14.todolist.utils.DateTimeUtils;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
@@ -60,8 +61,8 @@ public class TaskRepositoryImpl  implements TaskRepository {
                 .set(TASK.TITLE, task.getTitle())
                 .set(TASK.DESCRIPTION, task.getDescription())
                 .set(TASK.STATUS, task.getStatus().getCode())
-                .set(TASK.CREATED_AT, LocalDateTime.now(ZoneOffset.UTC))
-                .set(TASK.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+                .set(TASK.CREATED_AT, DateTimeUtils.now())
+                .set(TASK.UPDATED_AT, DateTimeUtils.now())
                 .returning(TASK.ID, TASK.TITLE, TASK.DESCRIPTION, TASK.STATUS, TASK.CREATED_AT, TASK.UPDATED_AT)
                 .fetchOne(this::map);
     }
@@ -71,7 +72,7 @@ public class TaskRepositoryImpl  implements TaskRepository {
                 .set(TASK.TITLE, task.getTitle())
                 .set(TASK.DESCRIPTION, task.getDescription())
                 .set(TASK.STATUS, task.getStatus().getCode())
-                .set(TASK.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+                .set(TASK.UPDATED_AT, DateTimeUtils.now())
                 .where(TASK.ID.eq(task.getId()))
                 .returning(TASK.ID, TASK.TITLE, TASK.DESCRIPTION, TASK.STATUS, TASK.CREATED_AT, TASK.UPDATED_AT)
                 .fetchOne(this::map);
@@ -114,8 +115,8 @@ public class TaskRepositoryImpl  implements TaskRepository {
                 .title(r.get(TASK.TITLE))
                 .description(r.get(TASK.DESCRIPTION))
                 .status(TaskStatus.fromCode(r.get(TASK.STATUS)))
-                .createdAt(r.get(TASK.CREATED_AT).toInstant(ZoneOffset.UTC))
-                .updatedAt(r.get(TASK.UPDATED_AT).toInstant(ZoneOffset.UTC))
+                .createdAt(DateTimeUtils.toInstant(r.get(TASK.CREATED_AT)))
+                .updatedAt(DateTimeUtils.toInstant(r.get(TASK.UPDATED_AT)))
                 .build();
     }
 

@@ -3,6 +3,7 @@ package com.khanhduy14.todolist.label.repository.impl;
 import com.khanhduy14.todolist.label.entity.Label;
 import com.khanhduy14.todolist.label.repository.LabelRepository;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.records.LabelRecord;
+import com.khanhduy14.todolist.utils.DateTimeUtils;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
@@ -30,21 +31,19 @@ public class LabelRepositoryImpl implements LabelRepository {
 
     @Override
     public Label save(String name) {
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         return dsl.insertInto(LABEL)
                 .set(LABEL.NAME, name)
-                .set(LABEL.CREATED_AT, now)
-                .set(LABEL.UPDATED_AT, now)
+                .set(LABEL.CREATED_AT, DateTimeUtils.now())
+                .set(LABEL.UPDATED_AT, DateTimeUtils.now())
                 .returning(LABEL.ID, LABEL.NAME, LABEL.CREATED_AT, LABEL.UPDATED_AT)
                 .fetchOne(this::map);
     }
 
     @Override
     public List<Label> bulkSave(List<String> names) {
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         var step = dsl.insertInto(LABEL, LABEL.NAME, LABEL.CREATED_AT, LABEL.UPDATED_AT);
         for (String n : names) {
-            step.values(n, now, now);
+            step.values(n, DateTimeUtils.now(), DateTimeUtils.now());
         }
         return step
                 .returning(LABEL.ID, LABEL.NAME, LABEL.CREATED_AT, LABEL.UPDATED_AT)
@@ -56,8 +55,8 @@ public class LabelRepositoryImpl implements LabelRepository {
         return Label.builder()
                 .id(r.get(LABEL.ID))
                 .name(r.get(LABEL.NAME))
-                .createdAt(r.get(LABEL.CREATED_AT).toInstant(ZoneOffset.UTC))
-                .updatedAt(r.get(LABEL.UPDATED_AT).toInstant(ZoneOffset.UTC))
+                .createdAt(DateTimeUtils.toInstant(r.get(LABEL.CREATED_AT)))
+                .updatedAt(DateTimeUtils.toInstant(r.get(LABEL.UPDATED_AT)))
                 .build();
     }
 }
