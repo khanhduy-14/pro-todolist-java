@@ -1,9 +1,11 @@
 package com.khanhduy14.todolist.task;
 
+import com.khanhduy14.todolist.common.constant.SortOrder;
 import com.khanhduy14.todolist.task.constant.TaskStatus;
 import com.khanhduy14.todolist.task.dto.TaskCreateReqDTO;
 import com.khanhduy14.todolist.task.dto.TaskUpdateReqDTO;
 import com.khanhduy14.todolist.task.entity.Task;
+import com.khanhduy14.todolist.task.params.TaskQueryParams;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -11,13 +13,16 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class TaskE2ETest extends GlobalE2ETest {
 
@@ -47,26 +52,109 @@ public class TaskE2ETest extends GlobalE2ETest {
 
     @Test
     void shouldListTasks() {
-        // Create two unique tasks
         String suffix = UUID.randomUUID().toString().substring(0, 8);
-        Task t1 = createTask("List Task A " + suffix, "Desc A");
+        Task t1 = createTask("List Task A " + suffix, "Desc A", List.of("Label A"));
         Task t2 = createTask("List Task B " + suffix, "Desc B");
 
-        ResponseEntity<Task[]> response = restTemplate.exchange(
-                BASE_URL,
-                HttpMethod.GET,
-                HttpEntity.EMPTY,
-                Task[].class
+        TaskQueryParams params = new TaskQueryParams();
+        List<Task> tasks = getTasks(params);
+        assertTaskExists(tasks, t1);
+        assertTaskExists(tasks, t2);
+    }
+
+    @Test
+    void shouldListTasksByTitle() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        Task t1 = createTask("Task A " + suffix, "Desc A", List.of("Label A"));
+        Task t2 = createTask("Task B " + suffix, "Desc B", List.of("Label B"));
+
+        TaskQueryParams params = new TaskQueryParams();
+        params.setTitle("A");
+
+        List<Task> tasks = getTasks(params);
+
+        assertThat(tasks.size()).isEqualTo(1);
+        assertTaskExists(tasks, t1);
+        assertTaskNotExists(tasks, t2);
+    }
+
+    @Test
+    void shouldListTasksByStatus() {
+        Task t1 = createTask("Task Status 1", "Desc", List.of());
+        Task t2 = createTask("Task Status 2", "Desc", List.of());
+
+        TaskUpdateReqDTO updates = new TaskUpdateReqDTO(
+               null,
+                null,
+                Optional.of(TaskStatus.IN_PROGRESS),
+                null
         );
 
+        restTemplate.exchange(
+                BASE_URL + "/" + t2.getId(),
+                HttpMethod.PATCH,
+                new HttpEntity<>(updates),
+                Task.class
+        );
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isNotNull();
+        TaskQueryParams params = new TaskQueryParams();
+        params.setStatus(TaskStatus.IN_PROGRESS);
 
-        List<Task> tasks = Arrays.asList(response.getBody());
-        assertThat(tasks.stream().anyMatch(t -> t.getId() == t1.getId() && t.getTitle().equals(t1.getTitle()))).isTrue();
-        assertThat(tasks.stream().anyMatch(t -> t.getId() == t2.getId() && t.getTitle().equals(t2.getTitle()))).isTrue();
+        List<Task> tasks = getTasks(params);
+
+        for (Task t : tasks) assertThat(t.getStatus()).isEqualTo(TaskStatus.IN_PROGRESS);
     }
+
+    @Test
+    void shouldListTasksByLabel() {
+        Task t1 = createTask("Task Label A", "Desc", List.of("1", "2"));
+        Task t2 = createTask("Task Label B", "Desc", List.of("3"));
+
+        TaskQueryParams params = new TaskQueryParams();
+        params.setLabels(List.of("1", "2"));
+
+        List<Task> tasks = getTasks(params);
+
+        assertTaskExists(tasks, t1);
+        assertTaskNotExists(tasks, t2);
+    }
+
+    @Test
+    void shouldListTasksWithPaginationAndSort() {
+        for (int i = 1; i <= 10; i++) {
+            createTask("Paginated Task " + i, "Desc", List.of());
+        }
+
+        TaskQueryParams params = new TaskQueryParams();
+        params.setOffset(0);
+        params.setLimit(7);
+        params.setSortBy("createdAt");
+        params.setSortOrder(SortOrder.DESC);
+
+        List<Task> tasks = getTasks(params);
+
+        assertThat(tasks.size()).isEqualTo(7);
+        assertThat(tasks.get(0).getCreatedAt()).isAfterOrEqualTo(tasks.get(4).getCreatedAt());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenSortOrderInvalid() {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(BASE_URL)
+                .queryParam("sortOrder", "descend");
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                builder.toUriString(),
+                HttpMethod.GET,
+                HttpEntity.EMPTY,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+        String body = response.getBody();
+        assertThat(body).contains("Failed to convert property value");
+    }
+
 
     @Test
     void shouldGetTaskDetail() {
@@ -140,15 +228,66 @@ public class TaskE2ETest extends GlobalE2ETest {
     }
 
     private Task createTask(String title, String description) {
-        TaskCreateReqDTO req = new TaskCreateReqDTO(title, description,  List.of("Label A", "Label B", "Label C"));
+        return createTask(title, description, List.of("Default Label A", "Default Label B"));
+    }
+
+    private Task createTask(String title, String description, List<String> labels) {
+        if (labels == null) {
+            labels = List.of();
+        }
+
+        TaskCreateReqDTO req = new TaskCreateReqDTO(title, description, labels);
         ResponseEntity<Task> response = restTemplate.exchange(
                 BASE_URL,
                 HttpMethod.POST,
                 new HttpEntity<>(req),
                 Task.class
         );
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
+
         return response.getBody();
     }
+
+    private void assertTaskExists(List<Task> tasks, Task expected) {
+        assertThat(tasks)
+                .extracting(Task::getId, Task::getTitle)
+                .contains(tuple(expected.getId(), expected.getTitle()));
+    }
+
+    private void assertTaskNotExists(List<Task> tasks, Task unexpected) {
+        assertThat(tasks)
+                .extracting(Task::getId, Task::getTitle)
+                .doesNotContain(tuple(unexpected.getId(), unexpected.getTitle()));
+    }
+
+    private List<Task> getTasks(TaskQueryParams params) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(BASE_URL);
+
+        if (params.getTitle() != null) builder.queryParam("title", params.getTitle());
+        if (params.getStatus() != null) builder.queryParam("status", params.getStatus());
+
+        if (params.getLabels() != null) {
+            for (String label : params.getLabels()) {
+                builder.queryParam("labels", label);
+            }
+        }
+        builder.queryParam("offset", params.getOffset());
+        builder.queryParam("limit", params.getLimit());
+        builder.queryParam("sortBy", params.getSortBy());
+        builder.queryParam("sortOrder", params.getSortOrder().name());
+
+        ResponseEntity<Task[]> response = restTemplate.exchange(
+                builder.toUriString(),
+                HttpMethod.GET,
+                HttpEntity.EMPTY,
+                Task[].class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Task[] body = response.getBody();
+        return Arrays.asList(Optional.ofNullable(body).orElse(new Task[0]));
+    }
+
 }

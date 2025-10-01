@@ -1,10 +1,12 @@
 package com.khanhduy14.todolist.task.controller.impl;
 
 
+import com.khanhduy14.todolist.common.params.PaginationParams;
 import com.khanhduy14.todolist.task.controller.TaskController;
 import com.khanhduy14.todolist.task.dto.TaskCreateReqDTO;
 import com.khanhduy14.todolist.task.dto.TaskUpdateReqDTO;
 import com.khanhduy14.todolist.task.entity.Task;
+import com.khanhduy14.todolist.task.params.TaskQueryParams;
 import com.khanhduy14.todolist.task.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,8 +24,8 @@ public class TaskControllerImpl implements TaskController {
 
     @GetMapping
     @Override
-    public ResponseEntity<List<Task>> getTasks() {
-       return ResponseEntity.ok(taskService.getTasks());
+    public ResponseEntity<List<Task>> getTasks(TaskQueryParams params) {
+       return ResponseEntity.ok(taskService.getTasks(params));
     }
 
     @PostMapping

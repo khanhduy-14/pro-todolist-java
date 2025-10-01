@@ -1,14 +1,17 @@
 package com.khanhduy14.todolist.task.service.impl;
 
+import com.khanhduy14.todolist.common.constant.SortOrder;
 import com.khanhduy14.todolist.label.entity.Label;
 import com.khanhduy14.todolist.label.service.LabelService;
 import com.khanhduy14.todolist.task.constant.TaskStatus;
 import com.khanhduy14.todolist.task.dto.TaskCreateReqDTO;
 import com.khanhduy14.todolist.task.dto.TaskUpdateReqDTO;
 import com.khanhduy14.todolist.task.entity.Task;
+import com.khanhduy14.todolist.task.params.TaskQueryParams;
 import com.khanhduy14.todolist.task.repository.TaskLabelRepository;
 import com.khanhduy14.todolist.task.repository.TaskRepository;
 import com.khanhduy14.todolist.task.service.TaskService;
+import com.khanhduy14.todolist.utils.NamingUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +30,16 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<Task> getTasks() {
-        return taskRepo.findAll();
+    public List<Task> getTasks(TaskQueryParams params) {
+        System.out.println("prams: " + params);
+        return taskRepo.findAll(
+                params.getOffset(),
+                params.getLimit(),
+                NamingUtils.camelToSnake(params.getSortBy()),
+                params.getSortOrder(),
+                params.getTitle(),
+                params.getStatus(),
+                params.getLabels());
     }
 
     @Override

@@ -1,11 +1,14 @@
 package com.khanhduy14.todolist.task.repository.impl;
 
+import com.khanhduy14.todolist.common.constant.SortOrder;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.records.TaskRecord;
 import com.khanhduy14.todolist.task.constant.TaskStatus;
 import com.khanhduy14.todolist.task.entity.Task;
 import com.khanhduy14.todolist.task.repository.TaskRepository;
 import com.khanhduy14.todolist.utils.DateTimeUtils;
+import com.khanhduy14.todolist.utils.NamingUtils;
 import org.jooq.DSLContext;
+import org.jooq.SelectJoinStep;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 import static com.khanhduy14.todolist.libs.jooq.generated.tables.Task.TASK;
@@ -31,8 +34,15 @@ public class TaskRepositoryImpl  implements TaskRepository {
     }
 
     @Override
-    public List<Task> findAll() {
-        return dsl.select(
+    public List<Task> findAll(int offset,
+                              int limit,
+                              String sortBy,
+                              SortOrder sortOrder,
+                              String title,
+                              TaskStatus status,
+                              List<String> labels) {
+
+        var query = dsl.select(
                         TASK.ID,
                         TASK.TITLE,
                         TASK.DESCRIPTION,
@@ -43,16 +53,29 @@ public class TaskRepositoryImpl  implements TaskRepository {
                 )
                 .from(TASK)
                 .leftJoin(TASK_LABEL).on(TASK.ID.eq(TASK_LABEL.TASK_ID))
-                .leftJoin(LABEL).on(TASK_LABEL.LABEL_ID.eq(LABEL.ID))
-                .groupBy(TASK.ID)
-                .fetch(r -> {
-                    Task t = map(r.into(TASK));
-                    t.setLabels(Optional.ofNullable(r.get("labels", String.class))
-                            .filter(s -> !s.isEmpty())
-                            .map(s -> Arrays.asList(s.split(",")))
-                            .orElse(List.of()));
-                    return t;
-                });
+                .leftJoin(LABEL).on(TASK_LABEL.LABEL_ID.eq(LABEL.ID));
+
+        applyFilters(query, title, status, labels);
+
+        query.groupBy(TASK.ID);
+
+        var sortField = TASK.field(sortBy);
+        if (sortOrder == SortOrder.DESC) {
+            query.orderBy(sortField.desc());
+        } else {
+            query.orderBy(sortField.asc());
+        }
+
+        query.limit(limit).offset(offset);
+
+        return query.fetch(r -> {
+            Task t = map(r.into(TASK));
+            t.setLabels(Optional.ofNullable(r.get("labels", String.class))
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> Arrays.asList(s.split(",")))
+                    .orElse(List.of()));
+            return t;
+        });
     }
 
     @Override
@@ -108,6 +131,7 @@ public class TaskRepositoryImpl  implements TaskRepository {
     public void deleteById(Integer id) {
         dsl.deleteFrom(TASK).where(TASK.ID.eq(id)).execute();
     }
+
     private Task map(TaskRecord r) {
         if (r == null) return null;
         return Task.builder()
@@ -119,5 +143,26 @@ public class TaskRepositoryImpl  implements TaskRepository {
                 .updatedAt(DateTimeUtils.toInstant(r.get(TASK.UPDATED_AT)))
                 .build();
     }
+
+    private void applyFilters(SelectJoinStep<?> query,
+                              String title,
+                              TaskStatus status,
+                              List<String> labels) {
+        if (title != null && !title.isEmpty()) {
+            query.where(TASK.TITLE.like("%" + title + "%"));
+        }
+        if (status != null) {
+            query.where(TASK.STATUS.eq(status.getCode()));
+        }
+        if (labels != null && !labels.isEmpty()) {
+            query.where(TASK.ID.in(
+                    DSL.select(TASK_LABEL.TASK_ID)
+                            .from(TASK_LABEL)
+                            .leftJoin(LABEL).on(TASK_LABEL.LABEL_ID.eq(LABEL.ID))
+                            .where(LABEL.NAME.in(labels))
+            ));
+        }
+    }
+
 
 }
