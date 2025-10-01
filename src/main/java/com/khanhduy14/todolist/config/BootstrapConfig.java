@@ -2,6 +2,7 @@ package com.khanhduy14.todolist.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.khanhduy14.todolist.config.module.DbConfig;
+import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -32,4 +33,29 @@ public class BootstrapConfig {
         return ds;
     }
 
+    @Bean(initMethod = "migrate")
+    public Flyway flyway(AppConfig appConfig) {
+        DbConfig db = appConfig.getDatabase().getPrimary();
+        var fw = appConfig.getFlyway();
+
+        if (fw == null || !fw.isEnabled()) {
+            System.out.println("⚠️ Flyway disabled in config.json");
+            return null;
+        }
+
+        System.out.println("🚀 Initializing Flyway...");
+        System.out.println("💾 DB URL: " + db.getUrl());
+        System.out.println("👤 DB User: " + db.getUsername());
+        System.out.println("📂 Flyway Locations: " + fw.getLocations());
+        System.out.println("🛠️ baselineOnMigrate: " + fw.isBaselineOnMigrate());
+
+        Flyway flyway = Flyway.configure()
+                .dataSource(db.getUrl(), db.getUsername(), db.getPassword())
+                .locations(fw.getLocations().toArray(new String[0]))
+                .baselineOnMigrate(fw.isBaselineOnMigrate())
+                .load();
+
+        System.out.println("✅ Flyway bean created. Migration will run now...");
+        return flyway;
+    }
 }
