@@ -35,59 +35,59 @@ public class TaskRecord extends UpdatableRecordImpl<TaskRecord> {
     }
 
     /**
-     * Setter for <code>public.task.created_at</code>.
-     */
-    public void setCreatedAt(LocalDateTime value) {
-        set(1, value);
-    }
-
-    /**
-     * Getter for <code>public.task.created_at</code>.
-     */
-    public LocalDateTime getCreatedAt() {
-        return (LocalDateTime) get(1);
-    }
-
-    /**
      * Setter for <code>public.task.description</code>.
      */
     public void setDescription(String value) {
-        set(2, value);
+        set(1, value);
     }
 
     /**
      * Getter for <code>public.task.description</code>.
      */
     public String getDescription() {
-        return (String) get(2);
+        return (String) get(1);
     }
 
     /**
      * Setter for <code>public.task.status</code>.
      */
     public void setStatus(Short value) {
-        set(3, value);
+        set(2, value);
     }
 
     /**
      * Getter for <code>public.task.status</code>.
      */
     public Short getStatus() {
-        return (Short) get(3);
+        return (Short) get(2);
     }
 
     /**
      * Setter for <code>public.task.title</code>.
      */
     public void setTitle(String value) {
-        set(4, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>public.task.title</code>.
      */
     public String getTitle() {
-        return (String) get(4);
+        return (String) get(3);
+    }
+
+    /**
+     * Setter for <code>public.task.created_at</code>.
+     */
+    public void setCreatedAt(LocalDateTime value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>public.task.created_at</code>.
+     */
+    public LocalDateTime getCreatedAt() {
+        return (LocalDateTime) get(4);
     }
 
     /**
@@ -127,14 +127,14 @@ public class TaskRecord extends UpdatableRecordImpl<TaskRecord> {
     /**
      * Create a detached, initialised TaskRecord
      */
-    public TaskRecord(Integer id, LocalDateTime createdAt, String description, Short status, String title, LocalDateTime updatedAt) {
+    public TaskRecord(Integer id, String description, Short status, String title, LocalDateTime createdAt, LocalDateTime updatedAt) {
         super(Task.TASK);
 
         setId(id);
-        setCreatedAt(createdAt);
         setDescription(description);
         setStatus(status);
         setTitle(title);
+        setCreatedAt(createdAt);
         setUpdatedAt(updatedAt);
         resetTouchedOnNotNull();
     }

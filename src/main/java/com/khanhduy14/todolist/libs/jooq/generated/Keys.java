@@ -4,9 +4,11 @@
 package com.khanhduy14.todolist.libs.jooq.generated;
 
 
+import com.khanhduy14.todolist.libs.jooq.generated.tables.FlywaySchemaHistory;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.Label;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.Task;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.TaskLabel;
+import com.khanhduy14.todolist.libs.jooq.generated.tables.records.FlywaySchemaHistoryRecord;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.records.LabelRecord;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.records.TaskLabelRecord;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.records.TaskRecord;
@@ -28,6 +30,7 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<FlywaySchemaHistoryRecord> FLYWAY_SCHEMA_HISTORY_PK = Internal.createUniqueKey(FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, DSL.name("flyway_schema_history_pk"), new TableField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK }, true);
     public static final UniqueKey<LabelRecord> LABEL_NAME_KEY = Internal.createUniqueKey(Label.LABEL, DSL.name("label_name_key"), new TableField[] { Label.LABEL.NAME }, true);
     public static final UniqueKey<LabelRecord> LABEL_PKEY = Internal.createUniqueKey(Label.LABEL, DSL.name("label_pkey"), new TableField[] { Label.LABEL.ID }, true);
     public static final UniqueKey<TaskRecord> TASK_PKEY = Internal.createUniqueKey(Task.TASK, DSL.name("task_pkey"), new TableField[] { Task.TASK.ID }, true);

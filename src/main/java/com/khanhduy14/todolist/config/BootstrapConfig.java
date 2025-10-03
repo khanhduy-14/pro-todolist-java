@@ -2,6 +2,8 @@ package com.khanhduy14.todolist.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.khanhduy14.todolist.config.module.DbConfig;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +21,6 @@ public class BootstrapConfig {
         AppConfig config = mapper.readValue(new ClassPathResource("config.json").getInputStream(), AppConfig.class);
         return config;
     }
-
     @Bean
     public DataSource dataSource(AppConfig config) {
         DbConfig db = config.getDatabase().getPrimary();

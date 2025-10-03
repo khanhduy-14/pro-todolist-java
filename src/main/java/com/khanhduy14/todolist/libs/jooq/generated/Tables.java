@@ -4,6 +4,7 @@
 package com.khanhduy14.todolist.libs.jooq.generated;
 
 
+import com.khanhduy14.todolist.libs.jooq.generated.tables.FlywaySchemaHistory;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.Label;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.Task;
 import com.khanhduy14.todolist.libs.jooq.generated.tables.TaskLabel;
@@ -14,6 +15,11 @@ import com.khanhduy14.todolist.libs.jooq.generated.tables.TaskLabel;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
 public class Tables {
+
+    /**
+     * The table <code>public.flyway_schema_history</code>.
+     */
+    public static final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
      * The table <code>public.label</code>.

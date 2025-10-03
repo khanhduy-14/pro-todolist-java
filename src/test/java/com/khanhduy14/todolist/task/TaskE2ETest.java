@@ -1,14 +1,16 @@
 package com.khanhduy14.todolist.task;
 
 import com.khanhduy14.todolist.common.constant.SortOrder;
-import com.khanhduy14.todolist.task.constant.TaskStatus;
-import com.khanhduy14.todolist.task.dto.TaskCreateReqDTO;
-import com.khanhduy14.todolist.task.dto.TaskUpdateReqDTO;
-import com.khanhduy14.todolist.task.entity.Task;
-import com.khanhduy14.todolist.task.params.TaskQueryParams;
+import com.khanhduy14.todolist.common.viewModel.PaginationResponse;
+import com.khanhduy14.todolist.modules.task.constant.TaskStatus;
+import com.khanhduy14.todolist.modules.task.dto.TaskCreateReqDTO;
+import com.khanhduy14.todolist.modules.task.dto.TaskUpdateReqDTO;
+import com.khanhduy14.todolist.modules.task.entity.Task;
+import com.khanhduy14.todolist.modules.task.params.TaskQueryParams;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -19,10 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.*;
 
 public class TaskE2ETest extends GlobalE2ETest {
 
@@ -57,7 +57,11 @@ public class TaskE2ETest extends GlobalE2ETest {
         Task t2 = createTask("List Task B " + suffix, "Desc B");
 
         TaskQueryParams params = new TaskQueryParams();
-        List<Task> tasks = getTasks(params);
+        PaginationResponse<Task> resp = getTasks(params);
+        List<Task> tasks = resp.data();
+        assertThat(resp.metadata().total()).isGreaterThanOrEqualTo(2);
+        assertThat(resp.metadata().offset()).isEqualTo(params.getOffset());
+        assertThat(resp.metadata().limit()).isEqualTo(params.getLimit());
         assertTaskExists(tasks, t1);
         assertTaskExists(tasks, t2);
     }
@@ -71,7 +75,8 @@ public class TaskE2ETest extends GlobalE2ETest {
         TaskQueryParams params = new TaskQueryParams();
         params.setTitle("A");
 
-        List<Task> tasks = getTasks(params);
+        PaginationResponse<Task> resp = getTasks(params);
+        List<Task> tasks = resp.data();
 
         assertThat(tasks.size()).isEqualTo(1);
         assertTaskExists(tasks, t1);
@@ -100,7 +105,8 @@ public class TaskE2ETest extends GlobalE2ETest {
         TaskQueryParams params = new TaskQueryParams();
         params.setStatus(TaskStatus.IN_PROGRESS);
 
-        List<Task> tasks = getTasks(params);
+        PaginationResponse<Task> resp = getTasks(params);
+        List<Task> tasks = resp.data();
 
         for (Task t : tasks) assertThat(t.getStatus()).isEqualTo(TaskStatus.IN_PROGRESS);
     }
@@ -113,7 +119,8 @@ public class TaskE2ETest extends GlobalE2ETest {
         TaskQueryParams params = new TaskQueryParams();
         params.setLabels(List.of("1", "2"));
 
-        List<Task> tasks = getTasks(params);
+        PaginationResponse<Task> resp = getTasks(params);
+        List<Task> tasks = resp.data();
 
         assertTaskExists(tasks, t1);
         assertTaskNotExists(tasks, t2);
@@ -131,7 +138,8 @@ public class TaskE2ETest extends GlobalE2ETest {
         params.setSortBy("createdAt");
         params.setSortOrder(SortOrder.DESC);
 
-        List<Task> tasks = getTasks(params);
+        PaginationResponse<Task> resp = getTasks(params);
+        List<Task> tasks = resp.data();
 
         assertThat(tasks.size()).isEqualTo(7);
         assertThat(tasks.get(0).getCreatedAt()).isAfterOrEqualTo(tasks.get(4).getCreatedAt());
@@ -262,7 +270,7 @@ public class TaskE2ETest extends GlobalE2ETest {
                 .doesNotContain(tuple(unexpected.getId(), unexpected.getTitle()));
     }
 
-    private List<Task> getTasks(TaskQueryParams params) {
+    private PaginationResponse<Task> getTasks(TaskQueryParams params) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(BASE_URL);
 
         if (params.getTitle() != null) builder.queryParam("title", params.getTitle());
@@ -278,16 +286,18 @@ public class TaskE2ETest extends GlobalE2ETest {
         builder.queryParam("sortBy", params.getSortBy());
         builder.queryParam("sortOrder", params.getSortOrder().name());
 
-        ResponseEntity<Task[]> response = restTemplate.exchange(
+        ResponseEntity<PaginationResponse<Task>> response = restTemplate.exchange(
                 builder.toUriString(),
                 HttpMethod.GET,
                 HttpEntity.EMPTY,
-                Task[].class
+                new ParameterizedTypeReference<PaginationResponse<Task>>() {}
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        Task[] body = response.getBody();
-        return Arrays.asList(Optional.ofNullable(body).orElse(new Task[0]));
+        assertThat(response.getBody().metadata().offset()).isEqualTo(params.getOffset());
+        assertThat(response.getBody().metadata().limit()).isEqualTo(params.getLimit());
+        assertThat(response.getBody().metadata().total()).isNotNull();
+        return response.getBody();
     }
 
 }

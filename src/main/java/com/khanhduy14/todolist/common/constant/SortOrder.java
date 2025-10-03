@@ -1,6 +1,9 @@
 package com.khanhduy14.todolist.common.constant;
 
 
+import lombok.Getter;
+
+@Getter
 public enum SortOrder {
     ASC("asc"),
     DESC("desc");
@@ -9,10 +12,6 @@ public enum SortOrder {
 
     SortOrder(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public static SortOrder fromString(String value) {

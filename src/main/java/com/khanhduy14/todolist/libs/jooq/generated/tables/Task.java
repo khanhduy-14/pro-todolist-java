@@ -61,11 +61,6 @@ public class Task extends TableImpl<TaskRecord> {
     public final TableField<TaskRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>public.task.created_at</code>.
-     */
-    public final TableField<TaskRecord, LocalDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.LOCALDATETIME(6), this, "");
-
-    /**
      * The column <code>public.task.description</code>.
      */
     public final TableField<TaskRecord, String> DESCRIPTION = createField(DSL.name("description"), SQLDataType.VARCHAR(255), this, "");
@@ -81,9 +76,14 @@ public class Task extends TableImpl<TaskRecord> {
     public final TableField<TaskRecord, String> TITLE = createField(DSL.name("title"), SQLDataType.VARCHAR(255), this, "");
 
     /**
+     * The column <code>public.task.created_at</code>.
+     */
+    public final TableField<TaskRecord, LocalDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
+
+    /**
      * The column <code>public.task.updated_at</code>.
      */
-    public final TableField<TaskRecord, LocalDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.LOCALDATETIME(6), this, "");
+    public final TableField<TaskRecord, LocalDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.LOCALDATETIME)), this, "");
 
     private Task(Name alias, Table<TaskRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
