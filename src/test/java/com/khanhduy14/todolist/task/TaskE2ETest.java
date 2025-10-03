@@ -123,7 +123,7 @@ public class TaskE2ETest extends GlobalE2ETest {
         Task t1 = createTask("Task Label A", "Desc", List.of("1", "2"));
         Task t2 = createTask("Task Label B", "Desc", List.of("2","3"));
         TaskQueryParams params = new TaskQueryParams();
-        params.setLabelIds(List.of(label1.getId().toString(), label2.getId().toString()));
+        params.setLabelId(List.of(label1.getId().toString(), label2.getId().toString()));
 
         PaginationResponse<Task> resp = getTasks(params);
         List<Task> tasks = resp.data();
@@ -282,9 +282,9 @@ public class TaskE2ETest extends GlobalE2ETest {
         if (params.getTitle() != null) builder.queryParam("title", params.getTitle());
         if (params.getStatus() != null) builder.queryParam("status", params.getStatus());
 
-        if (params.getLabelIds() != null) {
-            for (String label : params.getLabelIds()) {
-                builder.queryParam("labelIds", label);
+        if (params.getLabelId() != null) {
+            for (String label : params.getLabelId()) {
+                builder.queryParam("labelId", label);
             }
         }
         builder.queryParam("offset", params.getOffset());

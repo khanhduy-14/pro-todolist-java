@@ -37,7 +37,7 @@ public class TaskRepositoryImpl  implements TaskRepository {
                               SortOrder sortOrder,
                               String title,
                               TaskStatus status,
-                              List<String> labelIds) {
+                              List<String> labelId) {
 
         var query = dsl.select(
                         TASK.ID,
@@ -52,7 +52,7 @@ public class TaskRepositoryImpl  implements TaskRepository {
                 .leftJoin(TASK_LABEL).on(TASK.ID.eq(TASK_LABEL.TASK_ID))
                 .leftJoin(LABEL).on(TASK_LABEL.LABEL_ID.eq(LABEL.ID));
 
-        applyFilters(query, title, status, labelIds);
+        applyFilters(query, title, status, labelId);
 
         query.groupBy(TASK.ID);
 
@@ -144,21 +144,21 @@ public class TaskRepositoryImpl  implements TaskRepository {
     private void applyFilters(SelectJoinStep<?> query,
                               String title,
                               TaskStatus status,
-                              List<String> labelIds) {
+                              List<String> labelId) {
         if (title != null && !title.isEmpty()) {
             query.where(TASK.TITLE.like("%" + title + "%"));
         }
         if (status != null) {
             query.where(TASK.STATUS.eq(status.getCode()));
         }
-        if (labelIds != null && !labelIds.isEmpty()) {
+        if (labelId != null && !labelId.isEmpty()) {
             query.where(TASK.ID.in(
                     DSL.select(TASK_LABEL.TASK_ID)
                             .from(TASK_LABEL)
                             .leftJoin(LABEL).on(TASK_LABEL.LABEL_ID.eq(LABEL.ID))
-                            .where(LABEL.ID.in(labelIds))
+                            .where(LABEL.ID.in(labelId))
                             .groupBy(TASK_LABEL.TASK_ID)
-                            .having(DSL.countDistinct(TASK_LABEL.LABEL_ID).ge(labelIds.size()))
+                            .having(DSL.countDistinct(TASK_LABEL.LABEL_ID).ge(labelId.size()))
             ));
         }
     }

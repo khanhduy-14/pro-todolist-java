@@ -25,7 +25,6 @@ public class TaskControllerImpl implements TaskController {
     @GetMapping
     @Override
     public ResponseEntity<PaginationResponse<Task>> getTasks(TaskQueryParams params) {
-        System.out.println("controller nhan duoc labelIds: " + params.getLabelIds());
        List<Task> tasks = taskService.getTasks(params);
        PaginationResponse<Task> response = new PaginationResponse<>(
                taskService.getTasks(params),

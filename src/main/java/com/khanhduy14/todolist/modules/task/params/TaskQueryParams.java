@@ -13,5 +13,5 @@ import java.util.List;
 public class TaskQueryParams extends PaginationParams {
     private String title;
     private TaskStatus status;
-    private List<String> labelIds;
+    private List<String> labelId;
 }
