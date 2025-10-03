@@ -37,7 +37,7 @@ public class TaskServiceImpl implements TaskService {
                 params.getSortOrder(),
                 params.getTitle(),
                 params.getStatus(),
-                params.getLabels());
+                params.getLabelIds());
     }
 
     @Override

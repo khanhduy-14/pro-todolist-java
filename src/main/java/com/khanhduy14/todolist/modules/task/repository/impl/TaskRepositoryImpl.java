@@ -37,7 +37,7 @@ public class TaskRepositoryImpl  implements TaskRepository {
                               SortOrder sortOrder,
                               String title,
                               TaskStatus status,
-                              List<String> labels) {
+                              List<String> labelIds) {
 
         var query = dsl.select(
                         TASK.ID,
@@ -46,13 +46,13 @@ public class TaskRepositoryImpl  implements TaskRepository {
                         TASK.STATUS,
                         TASK.CREATED_AT,
                         TASK.UPDATED_AT,
-                        DSL.field("COALESCE(string_agg(label.name, ','), '')", String.class).as("labels")
+                        DSL.field("COALESCE(string_agg(label.name, ','), '')", String.class).as("labelIds")
                 )
                 .from(TASK)
                 .leftJoin(TASK_LABEL).on(TASK.ID.eq(TASK_LABEL.TASK_ID))
                 .leftJoin(LABEL).on(TASK_LABEL.LABEL_ID.eq(LABEL.ID));
 
-        applyFilters(query, title, status, labels);
+        applyFilters(query, title, status, labelIds);
 
         query.groupBy(TASK.ID);
 
@@ -67,7 +67,7 @@ public class TaskRepositoryImpl  implements TaskRepository {
 
         return query.fetch(r -> {
             Task t = map(r.into(TASK));
-            t.setLabels(Optional.ofNullable(r.get("labels", String.class))
+            t.setLabels(Optional.ofNullable(r.get("labelIds", String.class))
                     .filter(s -> !s.isEmpty())
                     .map(s -> Arrays.asList(s.split(",")))
                     .orElse(List.of()));
@@ -144,19 +144,21 @@ public class TaskRepositoryImpl  implements TaskRepository {
     private void applyFilters(SelectJoinStep<?> query,
                               String title,
                               TaskStatus status,
-                              List<String> labels) {
+                              List<String> labelIds) {
         if (title != null && !title.isEmpty()) {
             query.where(TASK.TITLE.like("%" + title + "%"));
         }
         if (status != null) {
             query.where(TASK.STATUS.eq(status.getCode()));
         }
-        if (labels != null && !labels.isEmpty()) {
+        if (labelIds != null && !labelIds.isEmpty()) {
             query.where(TASK.ID.in(
                     DSL.select(TASK_LABEL.TASK_ID)
                             .from(TASK_LABEL)
                             .leftJoin(LABEL).on(TASK_LABEL.LABEL_ID.eq(LABEL.ID))
-                            .where(LABEL.NAME.in(labels))
+                            .where(LABEL.ID.in(labelIds))
+                            .groupBy(TASK_LABEL.TASK_ID)
+                            .having(DSL.countDistinct(TASK_LABEL.LABEL_ID).ge(labelIds.size()))
             ));
         }
     }

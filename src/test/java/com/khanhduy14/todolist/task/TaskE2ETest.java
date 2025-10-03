@@ -2,11 +2,13 @@ package com.khanhduy14.todolist.task;
 
 import com.khanhduy14.todolist.common.constant.SortOrder;
 import com.khanhduy14.todolist.common.viewModel.PaginationResponse;
+import com.khanhduy14.todolist.libs.jooq.generated.tables.records.LabelRecord;
 import com.khanhduy14.todolist.modules.task.constant.TaskStatus;
 import com.khanhduy14.todolist.modules.task.dto.TaskCreateReqDTO;
 import com.khanhduy14.todolist.modules.task.dto.TaskUpdateReqDTO;
 import com.khanhduy14.todolist.modules.task.entity.Task;
 import com.khanhduy14.todolist.modules.task.params.TaskQueryParams;
+import org.jooq.DSLContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -16,8 +18,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.Arrays;
+import static com.khanhduy14.todolist.libs.jooq.generated.Tables.LABEL;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +29,9 @@ public class TaskE2ETest extends GlobalE2ETest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired
+    private DSLContext dslContext;
 
     private static final String BASE_URL = "/tasks";
 
@@ -113,11 +117,13 @@ public class TaskE2ETest extends GlobalE2ETest {
 
     @Test
     void shouldListTasksByLabel() {
+        LabelRecord label1 = dslContext.insertInto(LABEL).set(LABEL.NAME, "1").returning().fetchOne();
+        LabelRecord label2 = dslContext.insertInto(LABEL).set(LABEL.NAME, "2").returning().fetchOne();
+        dslContext.insertInto(LABEL).set(LABEL.NAME, "3").returning().fetchOne();
         Task t1 = createTask("Task Label A", "Desc", List.of("1", "2"));
-        Task t2 = createTask("Task Label B", "Desc", List.of("3"));
-
+        Task t2 = createTask("Task Label B", "Desc", List.of("2","3"));
         TaskQueryParams params = new TaskQueryParams();
-        params.setLabels(List.of("1", "2"));
+        params.setLabelIds(List.of(label1.getId().toString(), label2.getId().toString()));
 
         PaginationResponse<Task> resp = getTasks(params);
         List<Task> tasks = resp.data();
@@ -276,9 +282,9 @@ public class TaskE2ETest extends GlobalE2ETest {
         if (params.getTitle() != null) builder.queryParam("title", params.getTitle());
         if (params.getStatus() != null) builder.queryParam("status", params.getStatus());
 
-        if (params.getLabels() != null) {
-            for (String label : params.getLabels()) {
-                builder.queryParam("labels", label);
+        if (params.getLabelIds() != null) {
+            for (String label : params.getLabelIds()) {
+                builder.queryParam("labelIds", label);
             }
         }
         builder.queryParam("offset", params.getOffset());
